@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import csv
-import sys
 from bs4 import BeautifulSoup
-
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 PYTHON_VERSIONS = {
     'python3': {'download_path': 'download/python-3.5.2-docs-html', 'doc_base_url': 'https://docs.python.org/3.5{}',
@@ -304,10 +300,15 @@ class PythonDataOutput(object):
             for data_element in self.data:
                 if data_element.get('module') or data_element.get('function'):
                     method_signature = data_element.get('method_signature')
-                    first_paragraph = data_element.get('first_paragraph')
+                    first_paragraph = '<p>' + data_element.get('first_paragraph') + '</p>'
                     name, redirect = self.create_names_from_data(data_element)
 
-                    abstract = '{}{}{}'.format(method_signature, '<br>' if method_signature and first_paragraph else '', first_paragraph)
+                    if first_paragraph.startswith('Source code:'):
+                        temp = first_paragraph.split('.py',1)
+                        if len(temp) > 1:
+                            first_paragraph = temp[0] + '.py<br>' + temp[1]
+
+                    abstract = '<section class="prog__container">' + '{}{}{}'.format(first_paragraph, '' , method_signature) + '</section>'
                     url = data_element.get('url')
                     list_of_data = [
                         name,                       # unique name
